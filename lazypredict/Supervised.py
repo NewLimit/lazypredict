@@ -3,31 +3,32 @@ Supervised Models
 """
 # Author: Shankar Rao Pandala <shankar.pandala@live.com>
 
-import numpy as np
-import pandas as pd
-from tqdm import tqdm
-import datetime
+import logging
 import time
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer, MissingIndicator
-from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
-from sklearn.compose import ColumnTransformer
-from sklearn.utils import all_estimators
-from sklearn.base import RegressorMixin
-from sklearn.base import ClassifierMixin
-from sklearn.metrics import (
-    accuracy_score,
-    balanced_accuracy_score,
-    roc_auc_score,
-    f1_score,
-    r2_score,
-    mean_squared_error,
-)
 import warnings
-import xgboost
 
 # import catboost
 import lightgbm
+import numpy as np
+import pandas as pd
+import xgboost
+from sklearn.base import ClassifierMixin, RegressorMixin
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import (
+    accuracy_score,
+    balanced_accuracy_score,
+    f1_score,
+    mean_squared_error,
+    r2_score,
+    roc_auc_score,
+)
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
+from sklearn.utils import all_estimators
+from tqdm import tqdm
+
+logger = logging.getLogger(__name__)
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.precision", 2)
@@ -35,14 +36,15 @@ pd.set_option("display.float_format", lambda x: "%.2f" % x)
 
 removed_classifiers = [
     "ClassifierChain",
+    "CalibratedClassifierCV",
     "ComplementNB",
     "GradientBoostingClassifier",
     "GaussianProcessClassifier",
     "HistGradientBoostingClassifier",
     "MLPClassifier",
-    "LogisticRegressionCV", 
-    "MultiOutputClassifier", 
-    "MultinomialNB", 
+    "LogisticRegressionCV",
+    "MultiOutputClassifier",
+    "MultinomialNB",
     "OneVsOneClassifier",
     "OneVsRestClassifier",
     "OutputCodeClassifier",
@@ -52,20 +54,20 @@ removed_classifiers = [
 
 removed_regressors = [
     "TheilSenRegressor",
-    "ARDRegression", 
-    "CCA", 
-    "IsotonicRegression", 
+    "ARDRegression",
+    "CCA",
+    "IsotonicRegression",
     "StackingRegressor",
-    "MultiOutputRegressor", 
-    "MultiTaskElasticNet", 
-    "MultiTaskElasticNetCV", 
-    "MultiTaskLasso", 
-    "MultiTaskLassoCV", 
-    "PLSCanonical", 
-    "PLSRegression", 
-    "RadiusNeighborsRegressor", 
-    "RegressorChain", 
-    "VotingRegressor", 
+    "MultiOutputRegressor",
+    "MultiTaskElasticNet",
+    "MultiTaskElasticNetCV",
+    "MultiTaskLasso",
+    "MultiTaskLassoCV",
+    "PLSCanonical",
+    "PLSRegression",
+    "RadiusNeighborsRegressor",
+    "RegressorChain",
+    "VotingRegressor",
 ]
 
 CLASSIFIERS = [
@@ -286,6 +288,7 @@ class LazyClassifier:
                 print("Invalid Classifier(s)")
 
         for name, model in tqdm(self.classifiers):
+            logger.info("Fitting " + name)
             start = time.time()
             try:
                 if "random_state" in model().get_params().keys():
@@ -404,7 +407,7 @@ class LazyClassifier:
         Returns
         -------
         models: dict-object,
-            Returns a dictionary with each model pipeline as value 
+            Returns a dictionary with each model pipeline as value
             with key as name of models.
         """
         if len(self.models.keys()) == 0:
@@ -681,7 +684,7 @@ class LazyRegressor:
         Returns
         -------
         models: dict-object,
-            Returns a dictionary with each model pipeline as value 
+            Returns a dictionary with each model pipeline as value
             with key as name of models.
         """
         if len(self.models.keys()) == 0:
