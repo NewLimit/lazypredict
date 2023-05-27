@@ -45,6 +45,7 @@ removed_classifiers = [
     "LogisticRegressionCV",
     "MultiOutputClassifier",
     "MultinomialNB",
+    "NearestCentroid",
     "OneVsOneClassifier",
     "OneVsRestClassifier",
     "OutputCodeClassifier",
